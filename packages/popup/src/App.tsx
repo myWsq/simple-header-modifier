@@ -83,19 +83,21 @@ const PairInput: Component<{ i: number; class?: string }> = (props) => {
   return (
     <div class={`flex space-x-2 ${props.class}`}>
       <input
-        disabled={!item().active}
         spellcheck={false}
         class="input input-sm input-bordered block w-[10em]"
         classList={{
           "input-error": isKeyConflict(),
+          "line-through text-base-content/50": !item().active,
         }}
         placeholder="Header Key"
         value={item().headerKey}
         onInput={(e) => setKey(e.currentTarget.value)}
       ></input>
       <input
-        disabled={!item().active}
         class="input input-sm input-bordered block flex-grow"
+        classList={{
+          "line-through text-base-content/50": !item().active,
+        }}
         placeholder="Value"
         value={item().headerValue}
         onInput={(e) => setValue(e.currentTarget.value)}
