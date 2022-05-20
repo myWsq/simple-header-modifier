@@ -1,4 +1,4 @@
-import { createStore, produce } from "solid-js/store";
+import { createStore, produce, reconcile } from "solid-js/store";
 import { Component, createEffect, createMemo, Index } from "solid-js";
 import logoIcon from "./assets/logo.png";
 
@@ -9,11 +9,13 @@ type PairItem = {
 };
 
 type Store = {
+  version: "v1";
   globalActive: boolean;
   pairs: PairItem[];
 };
 
 const [store, setStore] = createStore<Store>({
+  version: "v1",
   globalActive: false,
   pairs: [{ headerKey: "", headerValue: "", active: true }],
 });
@@ -47,7 +49,7 @@ const PopupHeader: Component = () => {
   }
   return (
     <div class="flex items-center justify-between">
-      <h1 class="text-primary-content text-lg font-semibold">
+      <h1 class="text-base-content text-lg font-semibold">
         <Logo></Logo>
       </h1>
       <input
@@ -132,7 +134,7 @@ const PairStatusButton: Component<{ i: number; class?: string }> = (props) => {
 
   return (
     <label
-      class={`swap btn btn-circle btn-xs btn-ghost ${props.class}}`}
+      class={`swap btn btn-circle btn-xs btn-link ${props.class}}`}
       classList={{
         "swap-active": isActive(),
       }}
@@ -179,18 +181,16 @@ const PairDeleteButton: Component<{ i: number; class?: string }> = (props) => {
 
   return (
     <label
-      class={`btn btn-circle btn-xs btn-ghost ${props.class}`}
+      class={`btn btn-circle btn-xs btn-link ${props.class}`}
       classList={{
         "btn-disabled": isLastOne(),
+        "text-error": !isLastOne(),
       }}
       onClick={deleteItem}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         class="h-5 w-5"
-        classList={{
-          "text-error": !isLastOne(),
-        }}
         viewBox="0 0 20 20"
         fill="currentColor"
       >
@@ -236,22 +236,22 @@ const PairCreateButton: Component<{ class?: string }> = (props) => {
   );
 };
 
-
 async function init() {
-  console.log(chrome.storage.sync);
-  createEffect(() => {
-    console.log(store.globalActive);
-  });
+  const storeInitialValue: any = await chrome.storage.sync.get();
 
-  // const tab = await chrome.tabs.getCurrent();
-  // chrome.action.setIcon({
-  //   path: {
-  //     16: "../icons/icon_active_16x16.png",
-  //     32: "../icons/icon_active_32x32.png",
-  //     48: "../icons/icon_active_48x48.png",
-  //     128: "../icons/icon_active_128x128.png",
-  //   },
-  // });
+  // Get store initial value
+  if (storeInitialValue.version === store.version) {
+    setStore(
+      reconcile(storeInitialValue, {
+        merge: true,
+      })
+    );
+  }
+
+  // Subscribe store and sync data to storage
+  createEffect(() => {
+    chrome.storage.sync.set(store);
+  });
 }
 
 const App: Component = () => {

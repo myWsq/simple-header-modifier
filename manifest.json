@@ -18,5 +18,5 @@
       "128": "icons/icon_inactive_128x128.png"
     }
   },
-  "permissions": ["storage"]
+  "permissions": ["storage", "webRequest", "*://*/*"]
 }
