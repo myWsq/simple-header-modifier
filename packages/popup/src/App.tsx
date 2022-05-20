@@ -1,6 +1,6 @@
 import { createStore, produce, reconcile } from "solid-js/store";
 import { Component, createEffect, createMemo, Index } from "solid-js";
-import logoIcon from "./assets/logo.png";
+import logoIcon from "./logo.png";
 
 type PairItem = {
   headerKey: string;

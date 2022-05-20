@@ -1,0 +1,19 @@
+{
+  "name": "popup",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite build --watch --mode development",
+    "build": "tsc && vite build"
+  },
+  "dependencies": {
+    "daisyui": "^2.15.0",
+    "solid-js": "^1.4.2"
+  },
+  "devDependencies": {
+    "vite-plugin-solid": "^2.2.6",
+    "autoprefixer": "^10.4.7",
+    "postcss": "^8.4.14",
+    "tailwindcss": "^3.0.24"
+  }
+}
