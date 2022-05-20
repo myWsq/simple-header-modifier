@@ -1,5 +1,5 @@
-import { produce, reconcile } from "solid-js/store";
-import { Component, createEffect, createMemo, Index } from "solid-js";
+import { produce } from "solid-js/store";
+import { Component, createMemo, Index } from "solid-js";
 import logoIcon from "./logo.png";
 import { Store } from "./store";
 
