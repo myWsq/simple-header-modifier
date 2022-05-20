@@ -1,24 +1,7 @@
-import { createStore, produce, reconcile } from "solid-js/store";
+import { produce, reconcile } from "solid-js/store";
 import { Component, createEffect, createMemo, Index } from "solid-js";
 import logoIcon from "./logo.png";
-
-type PairItem = {
-  headerKey: string;
-  headerValue: string;
-  active: boolean;
-};
-
-type Store = {
-  version: "v1";
-  globalActive: boolean;
-  pairs: PairItem[];
-};
-
-const [store, setStore] = createStore<Store>({
-  version: "v1",
-  globalActive: false,
-  pairs: [{ headerKey: "", headerValue: "", active: true }],
-});
+import { Store } from "./store";
 
 const Logo: Component = () => {
   return (
@@ -41,7 +24,7 @@ const Logo: Component = () => {
 
 const PopupHeader: Component = () => {
   function toggleGlobalActive(active: boolean) {
-    setStore(
+    Store.set(
       produce((d) => {
         d.globalActive = active;
       })
@@ -55,7 +38,7 @@ const PopupHeader: Component = () => {
       <input
         type="checkbox"
         class="toggle toggle-accent"
-        checked={store.globalActive}
+        checked={Store.data.globalActive}
         onChange={(e) => toggleGlobalActive(e.currentTarget.checked)}
       />
     </div>
@@ -63,10 +46,10 @@ const PopupHeader: Component = () => {
 };
 
 const PairInput: Component<{ i: number; class?: string }> = (props) => {
-  const item = createMemo(() => store.pairs[props.i]);
+  const item = createMemo(() => Store.data.pairs[props.i]);
 
   function setKey(val: string) {
-    setStore(
+    Store.set(
       produce((d) => {
         d.pairs[props.i].headerKey = val;
       })
@@ -74,7 +57,7 @@ const PairInput: Component<{ i: number; class?: string }> = (props) => {
   }
 
   function setValue(val: string) {
-    setStore(
+    Store.set(
       produce((d) => {
         d.pairs[props.i].headerValue = val;
       })
@@ -84,7 +67,7 @@ const PairInput: Component<{ i: number; class?: string }> = (props) => {
   const isKeyConflict = createMemo(() => {
     const curItem = item();
     for (let i = 0; i < props.i; i++) {
-      const prevItem = store.pairs[i];
+      const prevItem = Store.data.pairs[i];
       if (
         curItem.headerKey &&
         curItem.active &&
@@ -122,10 +105,10 @@ const PairInput: Component<{ i: number; class?: string }> = (props) => {
 };
 
 const PairStatusButton: Component<{ i: number; class?: string }> = (props) => {
-  const isActive = createMemo(() => store.pairs[props.i].active);
+  const isActive = createMemo(() => Store.data.pairs[props.i].active);
 
   function toggleActive() {
-    setStore(
+    Store.set(
       produce((d) => {
         d.pairs[props.i].active = !isActive();
       })
@@ -170,14 +153,14 @@ const PairStatusButton: Component<{ i: number; class?: string }> = (props) => {
 
 const PairDeleteButton: Component<{ i: number; class?: string }> = (props) => {
   function deleteItem() {
-    setStore(
+    Store.set(
       produce((d) => {
         d.pairs.splice(props.i, 1);
       })
     );
   }
 
-  const isLastOne = createMemo(() => store.pairs.length === 1);
+  const isLastOne = createMemo(() => Store.data.pairs.length === 1);
 
   return (
     <label
@@ -206,7 +189,7 @@ const PairDeleteButton: Component<{ i: number; class?: string }> = (props) => {
 
 const PairCreateButton: Component<{ class?: string }> = (props) => {
   function addNewLine() {
-    setStore(
+    Store.set(
       produce((d) => {
         d.pairs.push({
           headerKey: "",
@@ -236,23 +219,7 @@ const PairCreateButton: Component<{ class?: string }> = (props) => {
   );
 };
 
-async function init() {
-  const storeInitialValue: any = await chrome.storage.sync.get();
-
-  // Get store initial value
-  if (storeInitialValue.version === store.version) {
-    setStore(
-      reconcile(storeInitialValue, {
-        merge: true,
-      })
-    );
-  }
-
-  // Subscribe store and sync data to storage
-  createEffect(() => {
-    chrome.storage.sync.set(store);
-  });
-}
+async function init() {}
 
 const App: Component = () => {
   init();
@@ -261,7 +228,7 @@ const App: Component = () => {
       <PopupHeader />
       <div class="divider my-2"></div>
       <div class="space-y-2">
-        <Index each={store.pairs}>
+        <Index each={Store.data.pairs}>
           {(_, i) => (
             <>
               <div class="flex space-x-2">

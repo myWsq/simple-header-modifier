@@ -1,13 +1,16 @@
+import * as path from "path";
 import { defineConfig } from "vite";
-import solidPlugin from "vite-plugin-solid";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [solidPlugin()],
-  base: "./",
   build: {
     target: "esnext",
     polyfillDynamicImport: false,
     sourcemap: true,
+    lib: {
+      entry: path.resolve(__dirname, "main.ts"),
+      formats: ["es"],
+      fileName: "main",
+    },
   },
 });

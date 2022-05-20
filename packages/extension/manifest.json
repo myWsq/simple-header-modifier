@@ -1,6 +1,6 @@
 {
-  "name": "Set Headers",
-  "description": "Modify the headers",
+  "name": "Simple Header Modifier",
+  "description": "Modify headers",
   "version": "1.0",
   "manifest_version": 3,
   "icons": {
@@ -18,5 +18,9 @@
       "128": "icons/icon_inactive_128x128.png"
     }
   },
-  "permissions": ["storage", "webRequest", "*://*/*"]
+  "background": {
+    "service_worker": "background/main.es.js"
+  },
+  "host_permissions": ["<all_urls>"],
+  "permissions": ["storage", "declarativeNetRequest"]
 }

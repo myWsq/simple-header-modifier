@@ -30,6 +30,12 @@ importers:
       typescript: 4.6.4
       vite: 2.9.9
 
+  packages/background:
+    specifiers:
+      p-debounce: ^4.0.0
+    dependencies:
+      p-debounce: 4.0.0
+
   packages/popup:
     specifiers:
       autoprefixer: ^10.4.7
@@ -1343,6 +1349,11 @@ packages:
     dependencies:
       wrappy: 1.0.2
     dev: true
+
+  /p-debounce/4.0.0:
+    resolution: {integrity: sha512-4Ispi9I9qYGO4lueiLDhe4q4iK5ERK8reLsuzH6BPaXn53EGaua8H66PXIFGrW897hwjXp+pVLrm/DLxN0RF0A==}
+    engines: {node: '>=12'}
+    dev: false
 
   /path-is-absolute/1.0.1:
     resolution: {integrity: sha512-AVbw3UJ2e9bq64vSaS9Am0fje1Pa8pbGqTTsmXfaIiMpnr5DlDhfJOuLj9Sf95ZPVDAUerDfEk88MPmPe7UCQg==}
