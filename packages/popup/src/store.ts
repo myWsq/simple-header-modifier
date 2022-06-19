@@ -5,16 +5,12 @@ const STORAGE_VERSION = "v2";
 export type Rule = {
   active: boolean;
   headers: { active: boolean; key: string; value: string }[];
-  ruleSetting: {
+  matchConfig: {
     matchMode: "domain" | "regexp";
     matchValue: string;
     methods?: string[];
     resourceTypes?: string[];
   };
-  history: {
-    time: number;
-    url: string;
-  }[];
 };
 
 export type History = Record<
@@ -73,7 +69,7 @@ const historyState = atom<History>({
   default: {},
 });
 
-const currentRuleIdState = atom<string | null>({
+export const currentRuleIdState = atom<string | null>({
   key: "currentRuleId",
   default: null,
 });
