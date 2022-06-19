@@ -1,17 +1,40 @@
-import { atom, AtomEffect } from "recoil";
+import produce from "immer";
+import { atom, AtomEffect, selector } from "recoil";
+import { z } from "zod";
 
 const STORAGE_VERSION = "v2";
 
-export type Rule = {
-  active: boolean;
-  headers: { active: boolean; key: string; value: string }[];
-  matchConfig: {
-    matchMode: "domain" | "regexp";
-    matchValue: string;
-    methods?: string[];
-    resourceTypes?: string[];
-  };
-};
+export const AVAILABLE_METHODS = [
+  "GET",
+  "POST",
+  "PUT",
+  "DELETE",
+  "HEAD",
+  "PATCH",
+  "OPTIONS",
+  "CONNECT",
+];
+
+export const RuleSchema = z.object({
+  active: z.boolean().default(true),
+  headers: z
+    .array(
+      z.object({
+        active: z.boolean(),
+        key: z.string(),
+        value: z.string(),
+      })
+    )
+    .default([]),
+  matchConfig: z.object({
+    matchMode: z.string(),
+    matchValue: z.string(),
+    methods: z.array(z.string()).default(AVAILABLE_METHODS),
+  }),
+  resourceTypes: z.array(z.string()).default(["main_frame"]),
+});
+
+export type Rule = z.infer<typeof RuleSchema>;
 
 export type History = Record<
   string,
@@ -72,6 +95,26 @@ const historyState = atom<History>({
 export const currentRuleIdState = atom<string | null>({
   key: "currentRuleId",
   default: null,
+});
+
+export const currentRuleState = selector({
+  key: "currentRule",
+  get({ get }) {
+    const currentRuleId = get(currentRuleIdState);
+    const ruleMap = get(ruleMapState);
+    return currentRuleId ? ruleMap[currentRuleId] : null;
+  },
+  set({ get, set }, newValue) {
+    const currentRuleId = get(currentRuleIdState);
+    if (currentRuleId && newValue) {
+      set(
+        ruleMapState,
+        produce((d) => {
+          d![currentRuleId] = RuleSchema.parse(newValue);
+        })
+      );
+    }
+  },
 });
 
 // import { createEffect, createRoot } from "solid-js";

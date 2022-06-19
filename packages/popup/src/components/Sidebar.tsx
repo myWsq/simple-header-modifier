@@ -1,6 +1,11 @@
 import { ActionGroup, Item, Switch } from "@adobe/react-spectrum";
 import { useRecoilState, useSetRecoilState } from "recoil";
-import { currentRuleIdState, globalActiveState, ruleMapState } from "../store";
+import {
+  currentRuleIdState,
+  globalActiveState,
+  ruleMapState,
+  RuleSchema,
+} from "../store";
 import { PlusSmIcon, MinusSmIcon } from "@heroicons/react/solid";
 import React from "react";
 import produce from "immer";
@@ -55,25 +60,12 @@ const SidebarHeader = () => {
         const id = nanoid();
         setRuleMap(
           produce((d) => {
-            d[id] = {
-              active: true,
-              headers: [],
+            d[id] = RuleSchema.parse({
               matchConfig: {
                 matchMode: "domain",
-                matchValue: "example.com",
-                methods: [
-                  "GET",
-                  "POST",
-                  "PUT",
-                  "DELETE",
-                  "HEAD",
-                  "PATCH",
-                  "OPTIONS",
-                  "CONNECT",
-                ],
-                resourceTypes: ["main_frame"],
+                matchValue: "exmaple.com\n",
               },
-            };
+            });
           })
         );
         setCurrentRuleId(id);
