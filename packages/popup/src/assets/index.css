@@ -10,4 +10,8 @@ html {
   * {
     @apply dark:border-white/10;
   }
+
+  svg {
+    @apply box-content;
+  }
 }
