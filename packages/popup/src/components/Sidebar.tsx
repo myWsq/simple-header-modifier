@@ -8,7 +8,7 @@ import {
   RuleSchema,
 } from "../store";
 import { PlusSmIcon, MinusSmIcon } from "@heroicons/react/solid";
-import React from "react";
+import React, { useLayoutEffect } from "react";
 import produce from "immer";
 import clsx from "clsx";
 import { useRecoilValue } from "recoil";
@@ -47,13 +47,15 @@ const SidebarItem: React.FC<{ ruleIndex: number }> = ({ ruleIndex }) => {
             );
           }}
         ></span>
-        <span className="font-medium">{rule.name || "Untitled"}</span>
+        <span className="font-medium truncate">{rule.name || "Untitled"}</span>
       </div>
       <div
         className="text-sm truncate scale-75"
         title={rule.matchConfig.regexp}
       >
-        {rule.matchConfig.regexp || "(Match none)"}
+        {rule.matchConfig.regexp
+          ? `/${rule.matchConfig.regexp}/`
+          : "(Match none)"}
       </div>
     </div>
   );
@@ -74,7 +76,6 @@ const SidebarHeader = () => {
             d.unshift(
               RuleSchema.parse({
                 matchConfig: {
-                  name: "Match All",
                   regexp: "",
                 },
               })
@@ -121,9 +122,12 @@ const RuleIndexEffect = () => {
   const currentRule = useRecoilValue(currentRuleState);
   const setCurrentRuleIndex = useSetRecoilState(currentRuleIndexState);
   const ruleList = useRecoilValue(ruleListState);
-  if (!currentRule && ruleList.length) {
-    setCurrentRuleIndex(0);
-  }
+
+  useLayoutEffect(() => {
+    if (!currentRule && ruleList.length) {
+      setCurrentRuleIndex(0);
+    }
+  }, [currentRule, setCurrentRuleIndex, ruleList]);
 
   return null;
 };
