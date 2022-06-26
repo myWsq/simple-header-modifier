@@ -53,9 +53,7 @@ const SidebarItem: React.FC<{ ruleIndex: number }> = ({ ruleIndex }) => {
         className="text-sm truncate scale-75"
         title={rule.matchConfig.regexp}
       >
-        {rule.matchConfig.regexp
-          ? `/${rule.matchConfig.regexp}/`
-          : "(Match none)"}
+        {rule.matchConfig.regexp || "(Match all)"}
       </div>
     </div>
   );

@@ -70,6 +70,7 @@ export const TabPanelSettings = () => {
           }
           value={urlRegexp}
           onChange={setUrlRegexp}
+          description="eg. //example\.com"
         />
         <CheckboxGroup
           label="HTTP Methods"

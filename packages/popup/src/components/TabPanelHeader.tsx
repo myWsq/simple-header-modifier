@@ -1,12 +1,6 @@
-import {
-  ActionButton,
-  Button,
-  LogicButton,
-  Switch,
-} from "@adobe/react-spectrum";
+import { ActionButton, Switch } from "@adobe/react-spectrum";
 import clsx from "clsx";
 import produce from "immer";
-import { useState } from "react";
 import { useRecoilState } from "recoil";
 import { currentRuleState } from "../store";
 import { assert } from "../utils/assert";
@@ -26,7 +20,6 @@ export const TabPanelHeader = () => {
   }
 
   function deleteLine(index: number) {
-    console.log(index);
     setCurrentRule(
       produce((d) => {
         assert(d);
@@ -39,7 +32,7 @@ export const TabPanelHeader = () => {
     th: "h-8 font-medium text-center border-l",
     input:
       "block px-2 w-full h-8 bg-transparent text-inherit focus:outline-none",
-    inputTd: "ring-inset ring-blue-500 transition-shadow focus-within:ring-2",
+    inputTd: "ring-inset ring-blue-500 transition-shadow focus-within:ring-1",
   };
 
   return (
@@ -109,13 +102,13 @@ export const TabPanelHeader = () => {
                     )
                   }
                 ></input>
+                <div className="flex absolute top-0 bottom-0 right-2 items-center">
+                  <TrashIcon
+                    className="hidden p-1 w-4 h-4 text-red-500 cursor-pointer group-hover:block hover:text-red-400"
+                    onClick={() => deleteLine(index)}
+                  ></TrashIcon>
+                </div>
               </td>
-              <div className="flex absolute top-0 bottom-0 right-2 items-center">
-                <TrashIcon
-                  className="hidden p-1 w-4 h-4 text-red-500 cursor-pointer group-hover:block hover:text-red-400"
-                  onClick={() => deleteLine(index)}
-                ></TrashIcon>
-              </div>
             </tr>
           ))}
         </tbody>
