@@ -2,13 +2,17 @@ import { Item, TabList, TabPanels, Tabs } from "@adobe/react-spectrum";
 import { useRecoilValue } from "recoil";
 import { currentRuleState } from "../store";
 import { TabPanelHeader } from "./TabPanelHeader";
-import { TabPanelMatchRule } from "./TabPanelRule";
+import { TabPanelSettings } from "./TabPanelSettings";
 
 export const Main = () => {
   const currentRule = useRecoilValue(currentRuleState);
 
   if (!currentRule) {
-    return <div>No Selected Rule</div>;
+    return (
+      <div className="flex justify-center items-center h-full">
+        No Selected Rule
+      </div>
+    );
   }
 
   return (
@@ -17,8 +21,8 @@ export const Main = () => {
         <div className="mt-[1px] flex overflow-hidden justify-center border-b flex-shrink-0">
           <TabList UNSAFE_className="mb-[-1px]">
             <Item>Headers</Item>
-            <Item>Match Rule</Item>
-            <Item>Match History</Item>
+            <Item>Settings</Item>
+            <Item>Logs</Item>
           </TabList>
         </div>
         <div className="overflow-auto flex-grow">
@@ -27,7 +31,7 @@ export const Main = () => {
               <TabPanelHeader />
             </Item>
             <Item>
-              <TabPanelMatchRule />
+              <TabPanelSettings />
             </Item>
             <Item>Alea jacta est.</Item>
           </TabPanels>
