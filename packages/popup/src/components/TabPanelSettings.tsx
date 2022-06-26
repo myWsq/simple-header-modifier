@@ -14,7 +14,7 @@ import {
 } from "../store";
 import { assert } from "../utils/assert";
 
-export const TabPanelMatchRule = () => {
+export const TabPanelSettings = () => {
   const [currentRule, setCurrentRule] = useRecoilState(currentRuleState);
 
   assert(currentRule);
