@@ -26,7 +26,7 @@ export const Main = () => {
           </TabList>
         </div>
         <div className="overflow-auto flex-grow">
-          <TabPanels>
+          <TabPanels UNSAFE_className="!border-none">
             <Item>
               <TabPanelHeader />
             </Item>
