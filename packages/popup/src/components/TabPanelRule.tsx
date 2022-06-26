@@ -2,64 +2,116 @@ import {
   Checkbox,
   CheckboxGroup,
   Form,
-  Radio,
-  RadioGroup,
-  TextArea,
+  TextField,
 } from "@adobe/react-spectrum";
 import produce from "immer";
+import { useEffect, useMemo, useState } from "react";
 import { useRecoilState } from "recoil";
-import { AVAILABLE_METHODS, currentRuleState } from "../store";
+import {
+  AVAILABLE_METHODS,
+  AVAILABLE_RESOURCE_TYPES,
+  currentRuleState,
+} from "../store";
+import { assert } from "../utils/assert";
 
 export const TabPanelMatchRule = () => {
   const [currentRule, setCurrentRule] = useRecoilState(currentRuleState);
 
-  if (!currentRule) {
-    return null;
-  }
+  assert(currentRule);
+
+  const [urlRegexp, setUrlRegexp] = useState(currentRule.matchConfig.regexp);
+
+  const isUrlRegexpValid = useMemo(() => {
+    try {
+      new RegExp(urlRegexp);
+      return true;
+    } catch {
+      return false;
+    }
+  }, [urlRegexp]);
+
+  useEffect(() => {
+    setUrlRegexp(currentRule.matchConfig.regexp || "");
+  }, [currentRule]);
+
+  useEffect(() => {
+    if (isUrlRegexpValid) {
+      setCurrentRule(
+        produce((d) => {
+          if (d) {
+            d.matchConfig.regexp = urlRegexp || "";
+          }
+        })
+      );
+    }
+  }, [urlRegexp, isUrlRegexpValid]);
 
   const { matchConfig: config } = currentRule;
 
   return (
-    <div className="px-4">
+    <div className="px-4 pb-4">
       <Form>
-        <RadioGroup
-          orientation="horizontal"
-          label="Match Mode"
-          isEmphasized
-          value={config.matchMode}
-          onChange={(val) => {
+        <TextField
+          label="Rule Name"
+          value={currentRule.name || ""}
+          onChange={(val) =>
             setCurrentRule(
               produce((d) => {
-                d!.matchConfig.matchMode = val;
+                assert(d);
+                d.name = val;
               })
-            );
-          }}
-        >
-          <Radio value="domain">Domain</Radio>
-          <Radio value="regexp">Regexp</Radio>
-        </RadioGroup>
-        <TextArea
-          label="Match Value"
-          description="Enter domains each line"
-          validationState={"invalid"}
+            )
+          }
+        />
+        <TextField
+          label="URL Regexp"
+          validationState={
+            urlRegexp ? (isUrlRegexpValid ? "valid" : "invalid") : undefined
+          }
+          value={urlRegexp}
+          onChange={setUrlRegexp}
         />
         <CheckboxGroup
           label="HTTP Methods"
           orientation="horizontal"
           value={config.methods}
-          onChange={(val) => {
+          onChange={(val) =>
             setCurrentRule(
               produce((d) => {
-                d!.matchConfig.methods = val;
+                assert(d);
+                d.matchConfig.methods = val;
               })
-            );
-          }}
+            )
+          }
         >
-          {AVAILABLE_METHODS.map((item) => (
-            <Checkbox key={item} value={item}>
-              {item}
-            </Checkbox>
-          ))}
+          <div className="grid grid-cols-3">
+            {AVAILABLE_METHODS.map((item) => (
+              <Checkbox key={item} value={item}>
+                {item}
+              </Checkbox>
+            ))}
+          </div>
+        </CheckboxGroup>
+        <CheckboxGroup
+          label="Resource Types"
+          orientation="horizontal"
+          value={config.resourceTypes}
+          onChange={(val) =>
+            setCurrentRule(
+              produce((d) => {
+                assert(d);
+                d.matchConfig.resourceTypes = val;
+              })
+            )
+          }
+        >
+          <div className="grid grid-cols-2">
+            {AVAILABLE_RESOURCE_TYPES.map((item) => (
+              <Checkbox key={item} value={item}>
+                {item}
+              </Checkbox>
+            ))}
+          </div>
         </CheckboxGroup>
       </Form>
     </div>

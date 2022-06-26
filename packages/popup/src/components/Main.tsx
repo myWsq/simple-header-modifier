@@ -1,8 +1,16 @@
 import { Item, TabList, TabPanels, Tabs } from "@adobe/react-spectrum";
+import { useRecoilValue } from "recoil";
+import { currentRuleState } from "../store";
 import { TabPanelHeader } from "./TabPanelHeader";
 import { TabPanelMatchRule } from "./TabPanelRule";
 
 export const Main = () => {
+  const currentRule = useRecoilValue(currentRuleState);
+
+  if (!currentRule) {
+    return <div>No Selected Rule</div>;
+  }
+
   return (
     <Tabs UNSAFE_className="h-full">
       <div className="flex flex-col h-full">

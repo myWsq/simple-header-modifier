@@ -15,8 +15,25 @@ export const AVAILABLE_METHODS = [
   "CONNECT",
 ];
 
+export const AVAILABLE_RESOURCE_TYPES = [
+  "main_frame",
+  "sub_frame",
+  "stylesheet",
+  "script",
+  "image",
+  "font",
+  "object",
+  "xmlhttprequest",
+  "ping",
+  "csp_report",
+  "media",
+  "websocket",
+  "other",
+];
+
 export const RuleSchema = z.object({
   active: z.boolean().default(true),
+  name: z.string().optional(),
   headers: z
     .array(
       z.object({
@@ -27,11 +44,10 @@ export const RuleSchema = z.object({
     )
     .default([]),
   matchConfig: z.object({
-    matchMode: z.string(),
-    matchValue: z.string(),
+    regexp: z.string().default(""),
     methods: z.array(z.string()).default(AVAILABLE_METHODS),
+    resourceTypes: z.array(z.string()).default(AVAILABLE_RESOURCE_TYPES),
   }),
-  resourceTypes: z.array(z.string()).default(["main_frame"]),
 });
 
 export type Rule = z.infer<typeof RuleSchema>;
@@ -67,12 +83,29 @@ const syncStorageEffect: <T>(key: string) => AtomEffect<T> =
 
     loadPersisted();
 
-    onSet((newValue) => {
+    onSet((newValue, _, isReset) => {
       // chrome.storage.sync.set({
       //   [combinedKey]: newValue,
       // });
-      localStorage.setItem(combinedKey, JSON.stringify(newValue));
+      isReset
+        ? localStorage.removeItem(combinedKey)
+        : localStorage.setItem(combinedKey, JSON.stringify(newValue));
     });
+
+    // const storageChangedHandler: Parameters<
+    //   typeof chrome.storage.onChanged.addListener
+    // >[0] = (e, areaName) => {
+    //   if (areaName === "sync") {
+    //     const data = e[combinedKey]?.newValue;
+    //     setSelf(data || null);
+    //   }
+    // };
+
+    // chrome.storage.onChanged.addListener(storageChangedHandler);
+
+    // return () => {
+    //   chrome.storage.onChanged.removeListener(storageChangedHandler);
+    // };
   };
 
 export const globalActiveState = atom({
@@ -81,10 +114,10 @@ export const globalActiveState = atom({
   effects: [syncStorageEffect("globalActive")],
 });
 
-export const ruleMapState = atom<Record<string, Rule>>({
-  key: "ruleMap",
-  default: {},
-  effects: [syncStorageEffect("ruleMap")],
+export const ruleListState = atom<Rule[]>({
+  key: "ruleList",
+  default: [],
+  effects: [syncStorageEffect("ruleList")],
 });
 
 const historyState = atom<History>({
@@ -92,28 +125,26 @@ const historyState = atom<History>({
   default: {},
 });
 
-export const currentRuleIdState = atom<string | null>({
-  key: "currentRuleId",
-  default: null,
+export const currentRuleIndexState = atom({
+  key: "currentRuleIndex",
+  default: -1,
 });
 
-export const currentRuleState = selector({
+export const currentRuleState = selector<Rule | undefined>({
   key: "currentRule",
   get({ get }) {
-    const currentRuleId = get(currentRuleIdState);
-    const ruleMap = get(ruleMapState);
-    return currentRuleId ? ruleMap[currentRuleId] : null;
+    const currentRuleIndex = get(currentRuleIndexState);
+    const ruleList = get(ruleListState);
+    return ruleList[currentRuleIndex];
   },
   set({ get, set }, newValue) {
-    const currentRuleId = get(currentRuleIdState);
-    if (currentRuleId && newValue) {
-      set(
-        ruleMapState,
-        produce((d) => {
-          d![currentRuleId] = RuleSchema.parse(newValue);
-        })
-      );
-    }
+    const currentRuleIndex = get(currentRuleIndexState);
+    set(
+      ruleListState,
+      produce((d) => {
+        d[currentRuleIndex] = RuleSchema.parse(newValue);
+      })
+    );
   },
 });
 

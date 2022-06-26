@@ -1,49 +1,59 @@
 import { ActionGroup, Item, Switch } from "@adobe/react-spectrum";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import {
-  currentRuleIdState,
+  currentRuleIndexState,
+  currentRuleState,
   globalActiveState,
-  ruleMapState,
+  ruleListState,
   RuleSchema,
 } from "../store";
 import { PlusSmIcon, MinusSmIcon } from "@heroicons/react/solid";
 import React from "react";
 import produce from "immer";
-import { nanoid } from "nanoid";
 import clsx from "clsx";
+import { useRecoilValue } from "recoil";
 
-const SidebarItem: React.FC<{ ruleId: string }> = ({ ruleId }) => {
-  const [ruleMap, setRuleMap] = useRecoilState(ruleMapState);
-  const [currentRuleId, setCurrentRuleId] = useRecoilState(currentRuleIdState);
+const SidebarItem: React.FC<{ ruleIndex: number }> = ({ ruleIndex }) => {
+  const [ruleList, setRuleList] = useRecoilState(ruleListState);
+  const [currentRuleId, setCurrentRuleId] = useRecoilState(
+    currentRuleIndexState
+  );
 
-  const rule = ruleMap[ruleId];
+  const rule = ruleList[ruleIndex];
 
   return (
     <div
       className={clsx(
         "py-1.5 px-2 cursor-pointer",
-        ruleId === currentRuleId && "bg-neutral-200 dark:bg-neutral-700 rounded"
+        ruleIndex === currentRuleId &&
+          "bg-neutral-200 dark:bg-neutral-700 rounded"
       )}
-      onClick={() => setCurrentRuleId(ruleId)}
+      onClick={() => setCurrentRuleId(ruleIndex)}
     >
       <div className="flex items-center space-x-2">
         <span
           className={clsx(
             "block w-3 h-3 rounded-full border-2 cursor-pointer",
             rule.active
-              ? "bg-neutral-200 border-neutral-500"
-              : "bg-green-200 border-green-400 dark:bg-green-200 dark:border-green-600"
+              ? "bg-green-200 border-green-400 dark:bg-green-200 dark:border-green-600"
+              : "bg-neutral-200 border-neutral-500"
           )}
           onClick={(e) => {
             e.stopPropagation();
-            setRuleMap(
+            setRuleList(
               produce((d) => {
-                d[ruleId].active = !d[ruleId].active;
+                d[ruleIndex].active = !d[ruleIndex].active;
               })
             );
           }}
         ></span>
-        <span>{rule.matchConfig.matchValue}</span>
+        <span className="font-medium">{rule.name || "Untitled"}</span>
+      </div>
+      <div
+        className="text-sm truncate scale-75"
+        title={rule.matchConfig.regexp}
+      >
+        {rule.matchConfig.regexp || "(Match none)"}
       </div>
     </div>
   );
@@ -51,34 +61,35 @@ const SidebarItem: React.FC<{ ruleId: string }> = ({ ruleId }) => {
 
 const SidebarHeader = () => {
   const [globalActive, setGlobalActive] = useRecoilState(globalActiveState);
-  const setRuleMap = useSetRecoilState(ruleMapState);
-  const [currentRuleId, setCurrentRuleId] = useRecoilState(currentRuleIdState);
+  const setRuleList = useSetRecoilState(ruleListState);
+  const [currentRuleIndex, setCurrentRuleId] = useRecoilState(
+    currentRuleIndexState
+  );
 
   const onAction = (key: React.Key) => {
     switch (key) {
       case "add":
-        const id = nanoid();
-        setRuleMap(
+        setRuleList(
           produce((d) => {
-            d[id] = RuleSchema.parse({
-              matchConfig: {
-                matchMode: "domain",
-                matchValue: "exmaple.com\n",
-              },
-            });
+            d.unshift(
+              RuleSchema.parse({
+                matchConfig: {
+                  name: "Match All",
+                  regexp: "",
+                },
+              })
+            );
           })
         );
-        setCurrentRuleId(id);
+        setCurrentRuleId(0);
         break;
 
       case "delete":
-        if (currentRuleId) {
-          setRuleMap(
-            produce((d) => {
-              delete d[currentRuleId];
-            })
-          );
-        }
+        setRuleList(
+          produce((d) => {
+            d.splice(currentRuleIndex, 1);
+          })
+        );
         break;
 
       default:
@@ -106,19 +117,33 @@ const SidebarHeader = () => {
   );
 };
 
+const RuleIndexEffect = () => {
+  const currentRule = useRecoilValue(currentRuleState);
+  const setCurrentRuleIndex = useSetRecoilState(currentRuleIndexState);
+  const ruleList = useRecoilValue(ruleListState);
+  if (!currentRule && ruleList.length) {
+    setCurrentRuleIndex(0);
+  }
+
+  return null;
+};
+
 export const Sidebar = () => {
-  const [ruleMap, setRuleMap] = useRecoilState(ruleMapState);
+  const ruleList = useRecoilValue(ruleListState);
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex sticky top-0 justify-between p-2 border-b dark:border-white/10">
-        <SidebarHeader />
+    <>
+      <RuleIndexEffect></RuleIndexEffect>
+      <div className="flex flex-col h-full">
+        <div className="flex sticky top-0 justify-between p-2 border-b dark:border-white/10">
+          <SidebarHeader />
+        </div>
+        <div className="overflow-auto flex-grow p-2">
+          {ruleList.map((_, id) => (
+            <SidebarItem key={id} ruleIndex={id}></SidebarItem>
+          ))}
+        </div>
       </div>
-      <div className="overflow-auto flex-grow p-2">
-        {Object.keys(ruleMap).map((id) => (
-          <SidebarItem key={id} ruleId={id}></SidebarItem>
-        ))}
-      </div>
-    </div>
+    </>
   );
 };
