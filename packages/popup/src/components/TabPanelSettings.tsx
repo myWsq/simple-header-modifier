@@ -2,10 +2,12 @@ import {
   Checkbox,
   CheckboxGroup,
   Form,
+  Link,
+  Radio,
+  RadioGroup,
   TextField,
 } from "@adobe/react-spectrum";
 import produce from "immer";
-import { useEffect, useMemo, useState } from "react";
 import { useRecoilState } from "recoil";
 import {
   AVAILABLE_METHODS,
@@ -18,33 +20,6 @@ export const TabPanelSettings = () => {
   const [currentRule, setCurrentRule] = useRecoilState(currentRuleState);
 
   assert(currentRule);
-
-  const [urlRegexp, setUrlRegexp] = useState(currentRule.matchConfig.regexp);
-
-  const isUrlRegexpValid = useMemo(() => {
-    try {
-      new RegExp(urlRegexp);
-      return true;
-    } catch {
-      return false;
-    }
-  }, [urlRegexp]);
-
-  useEffect(() => {
-    setUrlRegexp(currentRule.matchConfig.regexp || "");
-  }, [currentRule]);
-
-  useEffect(() => {
-    if (isUrlRegexpValid) {
-      setCurrentRule(
-        produce((d) => {
-          if (d) {
-            d.matchConfig.regexp = urlRegexp || "";
-          }
-        })
-      );
-    }
-  }, [urlRegexp, isUrlRegexpValid]);
 
   const { matchConfig: config } = currentRule;
 
@@ -63,15 +38,64 @@ export const TabPanelSettings = () => {
             )
           }
         />
+
+        <RadioGroup
+          label="Match Mode"
+          orientation="horizontal"
+          isEmphasized
+          value={config.matchMode}
+          onChange={(val) =>
+            setCurrentRule(
+              produce((d) => {
+                assert(d);
+                d.matchConfig.matchMode = val as any;
+              })
+            )
+          }
+        >
+          <Radio value="urlFilter">URL Filter</Radio>
+          <Radio value="urlRegexp">URL Regexp</Radio>
+        </RadioGroup>
+
+        <TextField
+          label="URL Filter"
+          value={config.urlFilter}
+          isHidden={config.matchMode !== "urlFilter"}
+          onChange={(val) =>
+            setCurrentRule(
+              produce((d) => {
+                assert(d);
+                d.matchConfig.urlFilter = val;
+              })
+            )
+          }
+          description={
+            <Link>
+              <a
+                target="_blank"
+                href="https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#rules"
+              >
+                Learn more
+              </a>
+            </Link>
+          }
+        />
+
         <TextField
           label="URL Regexp"
-          validationState={
-            urlRegexp ? (isUrlRegexpValid ? "valid" : "invalid") : undefined
+          value={config.urlRegexp}
+          isHidden={config.matchMode !== "urlRegexp"}
+          onChange={(val) =>
+            setCurrentRule(
+              produce((d) => {
+                assert(d);
+                d.matchConfig.urlRegexp = val;
+              })
+            )
           }
-          value={urlRegexp}
-          onChange={setUrlRegexp}
           description="eg. //example\.com"
         />
+
         <CheckboxGroup
           label="HTTP Methods"
           orientation="horizontal"

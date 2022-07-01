@@ -44,7 +44,10 @@ export const RuleSchema = z.object({
     )
     .default([]),
   matchConfig: z.object({
-    regexp: z.string().default(""),
+    matchMode: z.enum(["urlFilter", "urlRegexp"]).default("urlFilter"),
+    urlFilter: z.string().default(""),
+    urlRegexp: z.string().default(""),
+    domains: z.array(z.string()).default([]),
     methods: z.array(z.string()).default(AVAILABLE_METHODS),
     resourceTypes: z.array(z.string()).default(AVAILABLE_RESOURCE_TYPES),
   }),

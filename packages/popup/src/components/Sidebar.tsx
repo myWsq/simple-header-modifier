@@ -1,5 +1,9 @@
 import { ActionGroup, Item, Switch } from "@adobe/react-spectrum";
-import { useRecoilState, useSetRecoilState } from "recoil";
+import { MinusSmIcon, PlusSmIcon } from "@heroicons/react/solid";
+import clsx from "clsx";
+import produce from "immer";
+import React, { useLayoutEffect } from "react";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import {
   currentRuleIndexState,
   currentRuleState,
@@ -7,11 +11,6 @@ import {
   ruleListState,
   RuleSchema,
 } from "../store";
-import { PlusSmIcon, MinusSmIcon } from "@heroicons/react/solid";
-import React, { useLayoutEffect } from "react";
-import produce from "immer";
-import clsx from "clsx";
-import { useRecoilValue } from "recoil";
 
 const SidebarItem: React.FC<{ ruleIndex: number }> = ({ ruleIndex }) => {
   const [ruleList, setRuleList] = useRecoilState(ruleListState);
@@ -51,9 +50,9 @@ const SidebarItem: React.FC<{ ruleIndex: number }> = ({ ruleIndex }) => {
       </div>
       <div
         className="text-sm truncate scale-75"
-        title={rule.matchConfig.regexp}
+        title={rule.matchConfig[rule.matchConfig.matchMode]}
       >
-        {rule.matchConfig.regexp || "(Match all)"}
+        {rule.matchConfig[rule.matchConfig.matchMode] || "(Match all)"}
       </div>
     </div>
   );
