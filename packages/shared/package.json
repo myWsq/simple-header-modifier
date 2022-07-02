@@ -1,0 +1,8 @@
+{
+  "name": "shared",
+  "private": true,
+  "version": "0.0.0",
+  "dependencies": {
+    "zod": "^3.17.3"
+  }
+}

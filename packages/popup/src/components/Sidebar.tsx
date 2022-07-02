@@ -9,8 +9,9 @@ import {
   currentRuleState,
   globalActiveState,
   ruleListState,
-  RuleSchema,
 } from "../store";
+
+import { RuleSchema } from "shared/schemas";
 
 const SidebarItem: React.FC<{ ruleIndex: number }> = ({ ruleIndex }) => {
   const [ruleList, setRuleList] = useRecoilState(ruleListState);
