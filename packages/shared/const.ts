@@ -1,12 +1,12 @@
 export const AVAILABLE_METHODS = [
-  "GET",
-  "POST",
-  "PUT",
-  "DELETE",
-  "HEAD",
-  "PATCH",
-  "OPTIONS",
-  "CONNECT",
+  "get",
+  "post",
+  "put",
+  "delete",
+  "head",
+  "patch",
+  "options",
+  "connect",
 ];
 
 export const AVAILABLE_RESOURCE_TYPES = [
@@ -24,8 +24,3 @@ export const AVAILABLE_RESOURCE_TYPES = [
   "websocket",
   "other",
 ];
-
-const STORAGE_VERSION = "v2";
-
-export const RULE_LIST_STORAGE_KEY = STORAGE_VERSION + "/" + "ruleList";
-export const GLOBAL_ACTIVE_STORAGE_KEY = STORAGE_VERSION + "/" + "globalActive";

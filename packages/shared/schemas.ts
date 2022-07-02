@@ -24,3 +24,24 @@ export const RuleSchema = z.object({
 });
 
 export type RuleSchemaType = z.infer<typeof RuleSchema>;
+
+export const MessageSchema = z.discriminatedUnion("action", [
+  z.object({
+    action: z.literal("error"),
+    payload: z.string(),
+  }),
+  z.object({
+    action: z.literal("request"),
+    requestId: z.string(),
+    key: z.string(),
+    body: z.any(),
+  }),
+  z.object({
+    action: z.literal("response"),
+    requestId: z.string(),
+    success: z.boolean(),
+    body: z.any(),
+  }),
+]);
+
+export type MessageSchemaType = z.infer<typeof MessageSchema>;

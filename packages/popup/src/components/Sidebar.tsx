@@ -8,18 +8,18 @@ import {
   currentRuleIndexState,
   currentRuleState,
   globalActiveState,
-  ruleListState,
+  ruleDataState,
 } from "../store";
 
 import { RuleSchema } from "shared/schemas";
 
 const SidebarItem: React.FC<{ ruleIndex: number }> = ({ ruleIndex }) => {
-  const [ruleList, setRuleList] = useRecoilState(ruleListState);
+  const [ruleData, setRuleData] = useRecoilState(ruleDataState);
   const [currentRuleId, setCurrentRuleId] = useRecoilState(
     currentRuleIndexState
   );
 
-  const rule = ruleList[ruleIndex];
+  const rule = ruleData.list[ruleIndex];
 
   return (
     <div
@@ -40,9 +40,9 @@ const SidebarItem: React.FC<{ ruleIndex: number }> = ({ ruleIndex }) => {
           )}
           onClick={(e) => {
             e.stopPropagation();
-            setRuleList(
+            setRuleData(
               produce((d) => {
-                d[ruleIndex].active = !d[ruleIndex].active;
+                d.list[ruleIndex].active = !d.list[ruleIndex].active;
               })
             );
           }}
@@ -61,7 +61,7 @@ const SidebarItem: React.FC<{ ruleIndex: number }> = ({ ruleIndex }) => {
 
 const SidebarHeader = () => {
   const [globalActive, setGlobalActive] = useRecoilState(globalActiveState);
-  const setRuleList = useSetRecoilState(ruleListState);
+  const setRuleList = useSetRecoilState(ruleDataState);
   const [currentRuleIndex, setCurrentRuleId] = useRecoilState(
     currentRuleIndexState
   );
@@ -71,7 +71,7 @@ const SidebarHeader = () => {
       case "add":
         setRuleList(
           produce((d) => {
-            d.unshift(
+            d.list.unshift(
               RuleSchema.parse({
                 matchConfig: {
                   regexp: "",
@@ -86,7 +86,7 @@ const SidebarHeader = () => {
       case "delete":
         setRuleList(
           produce((d) => {
-            d.splice(currentRuleIndex, 1);
+            d.list.splice(currentRuleIndex, 1);
           })
         );
         break;
@@ -119,19 +119,19 @@ const SidebarHeader = () => {
 const RuleIndexEffect = () => {
   const currentRule = useRecoilValue(currentRuleState);
   const setCurrentRuleIndex = useSetRecoilState(currentRuleIndexState);
-  const ruleList = useRecoilValue(ruleListState);
+  const ruleData = useRecoilValue(ruleDataState);
 
   useLayoutEffect(() => {
-    if (!currentRule && ruleList.length) {
+    if (!currentRule && ruleData.list.length) {
       setCurrentRuleIndex(0);
     }
-  }, [currentRule, setCurrentRuleIndex, ruleList]);
+  }, [currentRule, setCurrentRuleIndex, ruleData]);
 
   return null;
 };
 
 export const Sidebar = () => {
-  const ruleList = useRecoilValue(ruleListState);
+  const ruleList = useRecoilValue(ruleDataState);
 
   return (
     <>
@@ -141,7 +141,7 @@ export const Sidebar = () => {
           <SidebarHeader />
         </div>
         <div className="overflow-auto flex-grow p-2">
-          {ruleList.map((_, id) => (
+          {ruleList.list.map((_, id) => (
             <SidebarItem key={id} ruleIndex={id}></SidebarItem>
           ))}
         </div>

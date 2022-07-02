@@ -1,7 +1,7 @@
 import produce from "immer";
-import { atom, AtomEffect, selector } from "recoil";
+import { atom, selector } from "recoil";
 import { RuleSchema, RuleSchemaType } from "shared/schemas";
-import { GLOBAL_ACTIVE_STORAGE_KEY, RULE_LIST_STORAGE_KEY } from "shared/const";
+import { request } from "./utils/request";
 
 export type History = Record<
   string,
@@ -11,64 +11,53 @@ export type History = Record<
   }[]
 >;
 
-const syncStorageEffect: <T>(key: string) => AtomEffect<T> =
-  (key) =>
-  ({ setSelf, onSet }) => {
-    const loadPersisted = async () => {
-      const data = await chrome.storage.sync.get(key);
-      const savedValue = data[key];
-      if (savedValue !== undefined) {
-        setSelf(savedValue);
-      }
-    };
-
-    loadPersisted();
-
-    onSet((newValue, _, isReset) => {
-      isReset
-        ? chrome.storage.sync.remove(key)
-        : chrome.storage.sync.set({
-            [key]: newValue,
-          });
-
-      // isReset
-      //   ? localStorage.removeItem(combinedKey)
-      //   : localStorage.setItem(combinedKey, JSON.stringify(newValue));
-    });
-
-    const storageChangedHandler: Parameters<
-      typeof chrome.storage.onChanged.addListener
-    >[0] = (e, areaName) => {
-      if (areaName === "sync") {
-        const data = e[key]?.newValue;
-        if (data !== undefined) {
-          setSelf(data);
-        }
-      }
-    };
-
-    chrome.storage.onChanged.addListener(storageChangedHandler);
-
-    return () => {
-      chrome.storage.onChanged.removeListener(storageChangedHandler);
-    };
-  };
+export const ruleError = atom({
+  key: "ruleError",
+  default: "",
+});
 
 export const globalActiveState = atom({
   key: "globalActive",
   default: false,
-  effects: [syncStorageEffect(GLOBAL_ACTIVE_STORAGE_KEY)],
 });
 
-export const ruleListState = atom<RuleSchemaType[]>({
-  key: "ruleList",
-  default: [],
-  effects: [syncStorageEffect(RULE_LIST_STORAGE_KEY)],
-});
+export const ruleDataState = atom<{ error: string; list: RuleSchemaType[] }>({
+  key: "ruleData",
+  default: {
+    error: "",
+    list: [],
+  },
+  effects: [
+    ({ setSelf, onSet }) => {
+      const load = async () => {
+        const data = await request("getRuleData");
+        setSelf(
+          produce((d) => {
+            d.list = data;
+          })
+        );
+      };
 
-const historyState = atom<History>({
-  key: "history",
-  default: {},
+      load();
+
+      onSet(async (newValue) => {
+        try {
+          await request("setRuleData", newValue.list || []);
+          setSelf(
+            produce((d) => {
+              d.error = "";
+            })
+          );
+        } catch (error) {
+          setSelf(
+            produce((d) => {
+              d.error = error;
+            })
+          );
+        }
+      });
+    },
+  ],
 });
 
 export const currentRuleIndexState = atom({
@@ -80,18 +69,23 @@ export const currentRuleState = selector<RuleSchemaType | undefined>({
   key: "currentRule",
   get({ get }) {
     const currentRuleIndex = get(currentRuleIndexState);
-    const ruleList = get(ruleListState);
+    const ruleList = get(ruleDataState).list;
     return ruleList[currentRuleIndex];
   },
   set({ get, set }, newValue) {
     const currentRuleIndex = get(currentRuleIndexState);
     set(
-      ruleListState,
+      ruleDataState,
       produce((d) => {
-        d[currentRuleIndex] = RuleSchema.parse(newValue);
+        d.list[currentRuleIndex] = RuleSchema.parse(newValue);
       })
     );
   },
+});
+
+const historyState = atom<History>({
+  key: "history",
+  default: {},
 });
 
 // import { createEffect, createRoot } from "solid-js";

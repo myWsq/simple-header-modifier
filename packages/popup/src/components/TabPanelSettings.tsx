@@ -15,7 +15,6 @@ import { AVAILABLE_METHODS, AVAILABLE_RESOURCE_TYPES } from "shared/const";
 
 export const TabPanelSettings = () => {
   const [currentRule, setCurrentRule] = useRecoilState(currentRuleState);
-
   assert(currentRule);
 
   const { matchConfig: config } = currentRule;

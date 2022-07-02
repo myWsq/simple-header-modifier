@@ -1,6 +1,5 @@
-import pDebounce from "p-debounce";
-import { RULE_LIST_STORAGE_KEY } from "shared/const";
-import { syncRule } from "./syncRule";
+import { catchError } from "./catchError";
+import { listenMessage } from "./listenMessage";
 
 // type PairItem = {
 //   headerKey: string;
@@ -73,18 +72,34 @@ import { syncRule } from "./syncRule";
 //   }
 // }
 
-const syncRuleDebounce = pDebounce(syncRule, 300);
+// const handleRuleDebounce = pDebounce(async () => {
+//   await clearError();
+//   await handleRules();
+// }, 300);
 
-async function main() {
-  // register listener
-  chrome.storage.onChanged.addListener((e, areaName) => {
-    if (areaName === "sync") {
-      const ruleList = e[RULE_LIST_STORAGE_KEY]?.newValue;
-      if (ruleList) syncRuleDebounce(ruleList);
-    }
-  });
+// async function main() {
+//   // clear error
+//   await clearError();
 
-  // await syncRuleDebounce();
-}
+//   // register listener
+//   chrome.storage.onChanged.addListener(async (e, areaName) => {
+//     if (areaName !== "sync") return;
+//     if (e[RULE_LIST_STORAGE_KEY] !== undefined) {
+//       await handleRuleDebounce();
+//     }
+//   });
 
-main();
+//   // manual trigger
+//   await handleRuleDebounce();
+// }
+
+self.addEventListener("error", (error) => {
+  catchError(error);
+});
+
+self.addEventListener("unhandledrejection", (error) => {
+  catchError(error.reason);
+});
+
+listenMessage();
+// main();

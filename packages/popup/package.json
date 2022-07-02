@@ -17,8 +17,8 @@
     "react-dom": "^18.2.0",
     "recoil": "^0.7.3",
     "recoil-sync": "0.0.1-alpha.2",
-    "shared": "workspace:*"
-
+    "shared": "workspace:*",
+    "swr": "^1.3.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.14",

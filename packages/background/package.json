@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "p-debounce": "^4.0.0",
-    "shared": "workspace:*"
+    "shared": "workspace:*",
+    "zod": "^3.17.3"
   }
 }
