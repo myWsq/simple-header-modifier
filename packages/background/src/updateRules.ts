@@ -1,18 +1,24 @@
 import { RuleSchemaType } from "shared/schemas";
 
 export async function updateRules(rules: RuleSchemaType[], dryRun = false) {
+  const rulesWithId: (RuleSchemaType & { id: number })[] = rules.map(
+    (rule, i) => ({
+      id: i + 1,
+      ...rule,
+    })
+  );
   const currentRules = await chrome.declarativeNetRequest.getDynamicRules();
 
   await chrome.declarativeNetRequest.updateDynamicRules({
     removeRuleIds: currentRules.map((item) => item.id), // remove current rules
-    addRules: rules // set new rules
+    addRules: rulesWithId // set new rules
       .filter(
         ({ active, headers }) =>
           active &&
           headers.filter((header) => header.active && header.key).length > 0
       )
-      .map((rule, i) => ({
-        id: i + 1,
+      .map((rule) => ({
+        id: rule.id,
         action: {
           type: chrome.declarativeNetRequest.RuleActionType.MODIFY_HEADERS,
           requestHeaders:
@@ -41,7 +47,7 @@ export async function updateRules(rules: RuleSchemaType[], dryRun = false) {
 
   if (dryRun) {
     await chrome.declarativeNetRequest.updateDynamicRules({
-      removeRuleIds: rules.map((_, i) => i + 1), // remove new rules
+      removeRuleIds: rulesWithId.map((rule) => rule.id), // remove new rules
       addRules: currentRules,
     });
   }

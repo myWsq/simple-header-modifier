@@ -2,7 +2,10 @@ import { Item, TabList, TabPanels, Tabs } from "@adobe/react-spectrum";
 import { useRecoilValue } from "recoil";
 import { currentRuleState } from "../store";
 import { TabPanelHeader } from "./TabPanelHeader";
+import { TabPanelLogs } from "./TabPanelLogs";
 import { TabPanelSettings } from "./TabPanelSettings";
+
+const isSupportLogs = Boolean(chrome.declarativeNetRequest.onRuleMatchedDebug);
 
 export const Main = () => {
   const currentRule = useRecoilValue(currentRuleState);
@@ -22,7 +25,7 @@ export const Main = () => {
           <TabList UNSAFE_className="mb-[-1px]">
             <Item>Headers</Item>
             <Item>Settings</Item>
-            <Item>Logs</Item>
+            {isSupportLogs ? <Item>Logs</Item> : <></>}
           </TabList>
         </div>
         <div className="overflow-auto flex-grow">
@@ -33,7 +36,13 @@ export const Main = () => {
             <Item>
               <TabPanelSettings />
             </Item>
-            <Item>Alea jacta est</Item>
+            {isSupportLogs ? (
+              <Item>
+                <TabPanelLogs></TabPanelLogs>
+              </Item>
+            ) : (
+              <></>
+            )}
           </TabPanels>
         </div>
       </div>

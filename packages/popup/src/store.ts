@@ -1,15 +1,7 @@
 import produce from "immer";
-import { atom, selector } from "recoil";
-import { RuleSchema, RuleSchemaType } from "shared/schemas";
+import { atom, selector, selectorFamily } from "recoil";
+import { LogSchemaType, RuleSchema, RuleSchemaType } from "shared/schemas";
 import { request } from "./utils/request";
-
-export type History = Record<
-  string,
-  {
-    time: number;
-    url: string;
-  }[]
->;
 
 export const ruleError = atom({
   key: "ruleError",
@@ -83,9 +75,37 @@ export const currentRuleState = selector<RuleSchemaType | undefined>({
   },
 });
 
-const historyState = atom<History>({
-  key: "history",
-  default: {},
+export const logsState = atom<LogSchemaType[]>({
+  key: "logs",
+  default: [],
+  effects: [
+    ({ setSelf }) => {
+      const load = async () => {
+        const [currentTab] = await chrome.tabs.query({
+          active: true,
+          currentWindow: true,
+        });
+        const data = await request("getLogs", currentTab.id);
+        setSelf(data);
+      };
+
+      const interval = setInterval(load, 500);
+
+      return () => {
+        clearInterval(interval);
+      };
+    },
+  ],
+});
+
+export const logsSelector = selectorFamily<LogSchemaType[], number>({
+  key: "logsSelector",
+  get(ruleIndex) {
+    return ({ get }) => {
+      const logs = get(logsState);
+      return logs.filter((item) => item.ruleId === ruleIndex + 1);
+    };
+  },
 });
 
 // import { createEffect, createRoot } from "solid-js";

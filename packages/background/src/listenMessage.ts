@@ -3,10 +3,14 @@ import { GLOBAL_ACTIVE_KEY, RULE_DATA_STORAGE_KEY } from "./const";
 import { updateRules } from "./updateRules";
 import { z } from "zod";
 import pDebounce from "p-debounce";
+import { LogsTempStorage } from "./listenMatchedRule";
 
 const setRuleDebounce = pDebounce(updateRules, 300);
 
-const handlers: Record<string, (body: any) => Promise<any>> = {
+const handlers: Record<
+  string,
+  (body: any, sender: chrome.runtime.MessageSender) => Promise<any>
+> = {
   // ----------------------------------------------------------------
   async getRuleData() {
     const data = await chrome.storage.local.get(RULE_DATA_STORAGE_KEY);
@@ -52,25 +56,32 @@ const handlers: Record<string, (body: any) => Promise<any>> = {
       [GLOBAL_ACTIVE_KEY]: isActive,
     });
   },
+
+  //  --------------------------------------------------------------
+  async getLogs(body) {
+    return LogsTempStorage[body] || [];
+  },
 };
 
 export function listenMessage() {
-  chrome.runtime.onMessage.addListener(async (message: MessageSchemaType) => {
-    if (message.action !== "request") return;
+  chrome.runtime.onMessage.addListener(
+    async (message: MessageSchemaType, sender) => {
+      if (message.action !== "request") return;
 
-    const response = (body?: any, success = true) =>
-      chrome.runtime.sendMessage<MessageSchemaType>({
-        action: "response",
-        requestId: message.requestId,
-        success,
-        body,
-      });
+      const response = (body?: any, success = true) =>
+        chrome.runtime.sendMessage<MessageSchemaType>({
+          action: "response",
+          requestId: message.requestId,
+          success,
+          body,
+        });
 
-    try {
-      const result = await handlers[message.key](message.body);
-      await response(result);
-    } catch (error: any) {
-      response(error.message || String(error), false);
+      try {
+        const result = await handlers[message.key](message.body, sender);
+        await response(result);
+      } catch (error: any) {
+        response(error.message || String(error), false);
+      }
     }
-  });
+  );
 }

@@ -22,5 +22,11 @@
     "service_worker": "background/main.es.js"
   },
   "host_permissions": ["<all_urls>"],
-  "permissions": ["storage", "declarativeNetRequest"]
+  "permissions": [
+    "storage",
+    "tabs",
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess",
+    "declarativeNetRequestFeedback"
+  ]
 }

@@ -8,6 +8,7 @@ import useSWR from "swr";
 import {
   currentRuleIndexState,
   currentRuleState,
+  logsSelector,
   ruleDataState,
 } from "../store";
 
@@ -20,11 +21,12 @@ const SidebarItem: React.FC<{ ruleIndex: number }> = ({ ruleIndex }) => {
     currentRuleIndexState
   );
   const rule = ruleData.list[ruleIndex];
+  const logs = useRecoilValue(logsSelector(ruleIndex));
 
   return (
     <div
       className={clsx(
-        "py-1.5 px-2 cursor-pointer",
+        "py-1.5 px-2 cursor-pointer relative",
         ruleIndex === currentRuleId &&
           "bg-neutral-200 dark:bg-neutral-700 rounded"
       )}
@@ -33,7 +35,7 @@ const SidebarItem: React.FC<{ ruleIndex: number }> = ({ ruleIndex }) => {
       <div className="flex items-center space-x-2">
         <span
           className={clsx(
-            "block w-3 h-3 rounded-full border-2 cursor-pointer",
+            "block w-3 h-3 rounded-full border-2 cursor-pointer flex-shrink-0",
             rule.active
               ? "bg-green-200 border-green-400 dark:bg-green-200 dark:border-green-600"
               : "bg-neutral-200 border-neutral-500"
@@ -55,6 +57,13 @@ const SidebarItem: React.FC<{ ruleIndex: number }> = ({ ruleIndex }) => {
       >
         {rule.matchConfig[rule.matchConfig.matchMode] || "(Match all)"}
       </div>
+      {logs.length > 0 && (
+        <div className="flex absolute top-0 right-0 bottom-1 justify-center items-center">
+          <span className="block px-1 py-0.5 leading-none text-white bg-blue-500 rounded-full scale-75">
+            {logs.length > 99 ? "99+" : logs.length}
+          </span>
+        </div>
+      )}
     </div>
   );
 };

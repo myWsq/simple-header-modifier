@@ -13,14 +13,16 @@ export const RuleSchema = z.object({
       })
     )
     .default([]),
-  matchConfig: z.object({
-    matchMode: z.enum(["urlFilter", "urlRegexp"]).default("urlFilter"),
-    urlFilter: z.string().default(""),
-    urlRegexp: z.string().default(""),
-    domains: z.array(z.string()).default([]),
-    methods: z.array(z.string()).default(AVAILABLE_METHODS),
-    resourceTypes: z.array(z.string()).default(AVAILABLE_RESOURCE_TYPES),
-  }),
+  matchConfig: z
+    .object({
+      matchMode: z.enum(["urlFilter", "urlRegexp"]).default("urlFilter"),
+      urlFilter: z.string().default(""),
+      urlRegexp: z.string().default(""),
+      domains: z.array(z.string()).default([]),
+      methods: z.array(z.string()).default(AVAILABLE_METHODS),
+      resourceTypes: z.array(z.string()).default(AVAILABLE_RESOURCE_TYPES),
+    })
+    .default({}),
 });
 
 export type RuleSchemaType = z.infer<typeof RuleSchema>;
@@ -45,3 +47,11 @@ export const MessageSchema = z.discriminatedUnion("action", [
 ]);
 
 export type MessageSchemaType = z.infer<typeof MessageSchema>;
+
+export const LogSchema = z.object({
+  method: z.string(),
+  url: z.string(),
+  ruleId: z.number(),
+});
+
+export type LogSchemaType = z.infer<typeof LogSchema>;
