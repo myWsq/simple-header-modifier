@@ -45,4 +45,12 @@ export async function updateRules(rules: RuleSchemaType[], dryRun = false) {
       addRules: currentRules,
     });
   }
+
+  // debug
+  if (import.meta.env.DEV) {
+    console.dir(await chrome.declarativeNetRequest.getDynamicRules(), {
+      depth: Infinity,
+      colors: true,
+    });
+  }
 }

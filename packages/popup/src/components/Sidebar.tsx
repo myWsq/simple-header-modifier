@@ -4,21 +4,21 @@ import clsx from "clsx";
 import produce from "immer";
 import React, { useLayoutEffect } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import useSWR from "swr";
 import {
   currentRuleIndexState,
   currentRuleState,
-  globalActiveState,
   ruleDataState,
 } from "../store";
 
 import { RuleSchema } from "shared/schemas";
+import { request } from "../utils/request";
 
 const SidebarItem: React.FC<{ ruleIndex: number }> = ({ ruleIndex }) => {
   const [ruleData, setRuleData] = useRecoilState(ruleDataState);
   const [currentRuleId, setCurrentRuleId] = useRecoilState(
     currentRuleIndexState
   );
-
   const rule = ruleData.list[ruleIndex];
 
   return (
@@ -60,7 +60,14 @@ const SidebarItem: React.FC<{ ruleIndex: number }> = ({ ruleIndex }) => {
 };
 
 const SidebarHeader = () => {
-  const [globalActive, setGlobalActive] = useRecoilState(globalActiveState);
+  const { data: globalActive, mutate: mutateGlobalActive } =
+    useSWR("getGlobalActive");
+
+  async function setGlobalActive(val: boolean) {
+    await request("setGlobalActive", val);
+    await mutateGlobalActive(val);
+  }
+
   const setRuleList = useSetRecoilState(ruleDataState);
   const [currentRuleIndex, setCurrentRuleId] = useRecoilState(
     currentRuleIndexState
@@ -71,13 +78,7 @@ const SidebarHeader = () => {
       case "add":
         setRuleList(
           produce((d) => {
-            d.list.unshift(
-              RuleSchema.parse({
-                matchConfig: {
-                  regexp: "",
-                },
-              })
-            );
+            d.list.unshift(RuleSchema.parse({}));
           })
         );
         setCurrentRuleId(0);
