@@ -11,7 +11,7 @@ import produce from "immer";
 import { useRecoilState } from "recoil";
 import { currentRuleState } from "../store";
 import { assert } from "../utils/assert";
-import { AVAILABLE_METHODS, AVAILABLE_RESOURCE_TYPES } from "shared/schemas";
+import { AVAILABLE_METHODS, AVAILABLE_RESOURCE_TYPES } from "shared/const";
 
 export const TabPanelSettings = () => {
   const [currentRule, setCurrentRule] = useRecoilState(currentRuleState);

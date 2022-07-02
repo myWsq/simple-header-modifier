@@ -1,31 +1,5 @@
 import { z } from "zod";
-
-export const AVAILABLE_METHODS = [
-  "GET",
-  "POST",
-  "PUT",
-  "DELETE",
-  "HEAD",
-  "PATCH",
-  "OPTIONS",
-  "CONNECT",
-];
-
-export const AVAILABLE_RESOURCE_TYPES = [
-  "main_frame",
-  "sub_frame",
-  "stylesheet",
-  "script",
-  "image",
-  "font",
-  "object",
-  "xmlhttprequest",
-  "ping",
-  "csp_report",
-  "media",
-  "websocket",
-  "other",
-];
+import { AVAILABLE_METHODS, AVAILABLE_RESOURCE_TYPES } from "./const";
 
 export const RuleSchema = z.object({
   active: z.boolean().default(true),
@@ -48,3 +22,5 @@ export const RuleSchema = z.object({
     resourceTypes: z.array(z.string()).default(AVAILABLE_RESOURCE_TYPES),
   }),
 });
+
+export type RuleSchemaType = z.infer<typeof RuleSchema>;

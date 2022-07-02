@@ -33,7 +33,7 @@ export const Main = () => {
             <Item>
               <TabPanelSettings />
             </Item>
-            <Item>Alea jacta est.</Item>
+            <Item>Alea jacta est</Item>
           </TabPanels>
         </div>
       </div>

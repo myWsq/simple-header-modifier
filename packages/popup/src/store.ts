@@ -1,11 +1,7 @@
 import produce from "immer";
 import { atom, AtomEffect, selector } from "recoil";
-import { z } from "zod";
-import { RuleSchema } from "shared/schemas";
-
-const STORAGE_VERSION = "v2";
-
-export type Rule = z.infer<typeof RuleSchema>;
+import { RuleSchema, RuleSchemaType } from "shared/schemas";
+import { GLOBAL_ACTIVE_STORAGE_KEY, RULE_LIST_STORAGE_KEY } from "shared/const";
 
 export type History = Record<
   string,
@@ -17,21 +13,11 @@ export type History = Record<
 
 const syncStorageEffect: <T>(key: string) => AtomEffect<T> =
   (key) =>
-  ({ setSelf, onSet, trigger }) => {
-    const combinedKey = STORAGE_VERSION + "/" + key;
-
-    /** 如果有一个持久化的值，在加载时设置它 */
+  ({ setSelf, onSet }) => {
     const loadPersisted = async () => {
-      // const data = await chrome.storage.sync.get(combinedKey);
-      // const savedValue = data[combinedKey];
-
-      let savedValue: any = localStorage.getItem(combinedKey);
-
-      if (savedValue) {
-        savedValue = JSON.parse(savedValue);
-      }
-
-      if (savedValue != null) {
+      const data = await chrome.storage.sync.get(key);
+      const savedValue = data[key];
+      if (savedValue !== undefined) {
         setSelf(savedValue);
       }
     };
@@ -39,40 +25,45 @@ const syncStorageEffect: <T>(key: string) => AtomEffect<T> =
     loadPersisted();
 
     onSet((newValue, _, isReset) => {
-      // chrome.storage.sync.set({
-      //   [combinedKey]: newValue,
-      // });
       isReset
-        ? localStorage.removeItem(combinedKey)
-        : localStorage.setItem(combinedKey, JSON.stringify(newValue));
+        ? chrome.storage.sync.remove(key)
+        : chrome.storage.sync.set({
+            [key]: newValue,
+          });
+
+      // isReset
+      //   ? localStorage.removeItem(combinedKey)
+      //   : localStorage.setItem(combinedKey, JSON.stringify(newValue));
     });
 
-    // const storageChangedHandler: Parameters<
-    //   typeof chrome.storage.onChanged.addListener
-    // >[0] = (e, areaName) => {
-    //   if (areaName === "sync") {
-    //     const data = e[combinedKey]?.newValue;
-    //     setSelf(data || null);
-    //   }
-    // };
+    const storageChangedHandler: Parameters<
+      typeof chrome.storage.onChanged.addListener
+    >[0] = (e, areaName) => {
+      if (areaName === "sync") {
+        const data = e[key]?.newValue;
+        if (data !== undefined) {
+          setSelf(data);
+        }
+      }
+    };
 
-    // chrome.storage.onChanged.addListener(storageChangedHandler);
+    chrome.storage.onChanged.addListener(storageChangedHandler);
 
-    // return () => {
-    //   chrome.storage.onChanged.removeListener(storageChangedHandler);
-    // };
+    return () => {
+      chrome.storage.onChanged.removeListener(storageChangedHandler);
+    };
   };
 
 export const globalActiveState = atom({
   key: "globalActive",
   default: false,
-  effects: [syncStorageEffect("globalActive")],
+  effects: [syncStorageEffect(GLOBAL_ACTIVE_STORAGE_KEY)],
 });
 
-export const ruleListState = atom<Rule[]>({
+export const ruleListState = atom<RuleSchemaType[]>({
   key: "ruleList",
   default: [],
-  effects: [syncStorageEffect("ruleList")],
+  effects: [syncStorageEffect(RULE_LIST_STORAGE_KEY)],
 });
 
 const historyState = atom<History>({
@@ -85,7 +76,7 @@ export const currentRuleIndexState = atom({
   default: -1,
 });
 
-export const currentRuleState = selector<Rule | undefined>({
+export const currentRuleState = selector<RuleSchemaType | undefined>({
   key: "currentRule",
   get({ get }) {
     const currentRuleIndex = get(currentRuleIndexState);
