@@ -8,7 +8,7 @@ export default defineConfig({
     polyfillDynamicImport: false,
     sourcemap: true,
     lib: {
-      entry: path.resolve(__dirname, "main.ts"),
+      entry: path.resolve(__dirname, "src", "main.ts"),
       formats: ["es"],
       fileName: "main",
     },

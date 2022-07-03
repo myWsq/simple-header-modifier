@@ -7,6 +7,8 @@
     "build": "tsc && vite build"
   },
   "dependencies": {
-    "p-debounce": "^4.0.0"
+    "p-debounce": "^4.0.0",
+    "shared": "workspace:*",
+    "zod": "^3.17.3"
   }
 }

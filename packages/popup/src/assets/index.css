@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  @apply w-[600px] max-h-[600px] min-h-[400px] overflow-auto;
+}
+
+@layer base {
+  * {
+    @apply dark:border-white/10;
+  }
+
+  svg {
+    @apply box-content;
+  }
+}
