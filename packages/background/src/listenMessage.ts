@@ -55,6 +55,9 @@ const handlers: Record<
     await chrome.storage.local.set({
       [GLOBAL_ACTIVE_KEY]: isActive,
     });
+    chrome.action.setIcon({
+      path: `../icons/${isActive ? "icon.png" : "icon_inactive.png"}`,
+    });
   },
 
   //  --------------------------------------------------------------
