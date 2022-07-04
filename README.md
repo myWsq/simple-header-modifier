@@ -21,7 +21,7 @@ A lightweight chrome extension that allows you to easily add custom headers to r
     <img width="400" src="./static/screenshot-2.png"></img>
 </div>
 
-## install
+## Install
 
 - [Download](https://github.com/myWsq/simple-header-modifier/releases) the last version zip file and unzip it to a folder.
 
@@ -33,7 +33,7 @@ A lightweight chrome extension that allows you to easily add custom headers to r
 
 ## Note 
 
-Simple Header Modifier modified your request headers and get feedback through the [declarativeNetRequest API](https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest). However, the [`onRuleMatchedDebug`](https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#event-onRuleMatchedDebug) method is only available for unpacked extensions. This is the reason why this extension cannot be downloaded through the store.
+Simple Header Modifier modified your request headers and get feedback through the [declarativeNetRequest API](https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest). However, the [`onRuleMatchedDebug`](https://developer.chrome.com/docs/extensions/reference/declarativeNetRequest/#event-onRuleMatchedDebug) method is only available for unpacked extensions. This is the reason why this extension cannot be installed by store.
 
 ## License
 
